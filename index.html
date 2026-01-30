@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Jiajun Tang</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <style>
+    :root{
+      --accent:#e3a54b;
+      --text-main:#1f2937;
+      --text-muted:#6b7280;
+      --border:#e5e7eb;
+      --bg-soft:#f7f8fc;
+      --bg-card:#ffffff;
+      --radius-lg:22px;
+      --radius-md:14px;
+
+      --nav-pad:4px;
+      --sticky-top:16px;
+      --scroll-gap:12px; /* space between sticky header and section title after jump */
+    }
+
+    *{box-sizing:border-box;margin:0;padding:0;}
+
+    body{
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;
+      background:#f6f7fb;
+      color:var(--text-main);
+      padding:32px 16px;
+    }
+
+    .page{
+      max-width:1120px;
+      margin:auto;
+      background:var(--bg-card);
+      border-radius:28px;
+      padding:28px 32px;
+      box-shadow:0 20px 50px rgba(0,0,0,.08);
+    }
+
+    /* ===== Sticky / Blurred Header (frozen nav) ===== */
+    header{
+      position:sticky;
+      top:var(--sticky-top);
+      z-index:50;
+
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+
+      margin-bottom:28px;
+      padding:10px 12px;
+
+      background:rgba(255,255,255,.72);
+      backdrop-filter:blur(14px);
+      -webkit-backdrop-filter:blur(14px);
+
+      border:1px solid rgba(229,231,235,.75);
+      border-radius:18px;
+    }
+
+    .site-title{
+      font-size:22px;
+      font-weight:700;
+      padding-left:6px;
+    }
+
+    /* ===== Top Nav with animated indicator ===== */
+    nav{
+      position:relative;
+      display:flex;
+      gap:6px;
+      background:rgba(241,243,249,.85);
+      padding:var(--nav-pad);
+      border-radius:999px;
+      overflow:hidden;
+    }
+
+    nav a{
+      position:relative;
+      z-index:1;
+      text-decoration:none;
+      font-size:13px;
+      padding:6px 14px;
+      border-radius:999px;
+      color:var(--text-muted);
+      font-weight:500;
+      white-space:nowrap;
+      text-align:center;
+    }
+
+    nav a.active{ color:var(--text-main); }
+
+    /* The white pill (indicator) */
+    .nav-indicator{
+      position:absolute;
+      top:var(--nav-pad);
+      left:var(--nav-pad);
+      height:calc(100% - (var(--nav-pad) * 2));
+      width:0px;
+      border-radius:999px;
+      background:#ffffff;
+      box-shadow:0 4px 10px rgba(0,0,0,.08);
+      transform:translateX(0);
+      transition:
+        transform 320ms cubic-bezier(.2,.8,.2,1),
+        width 320ms cubic-bezier(.2,.8,.2,1);
+      z-index:0;
+      will-change:transform,width;
+    }
+
+    .layout{
+      display:grid;
+      grid-template-columns:280px 1fr;
+      gap:32px;
+    }
+
+    /* ===== Left ===== */
+    .profile{
+      border:1px solid var(--border);
+      border-radius:var(--radius-lg);
+      padding:18px;
+    }
+
+    .avatar{
+      height:260px;
+      border-radius:20px;
+      overflow:hidden;
+      margin-bottom:16px;
+      background:#111827;
+    }
+
+    .avatar img{
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      object-position:top center;
+      display:block;
+    }
+
+    .name{
+      font-size:22px;
+      font-weight:700;
+      margin-bottom:6px;
+    }
+
+    .degree-main,.degree-sub{
+      font-size:14px;
+      font-weight:600;
+      line-height:1.45;
+    }
+
+    .degree-main{color:var(--accent);}
+    .degree-sub{color:var(--text-muted);margin-bottom:10px;}
+
+    .contact-info{
+      font-size:13px;
+      color:var(--text-muted);
+      line-height:1.6;
+      margin-bottom:14px;
+    }
+
+    .contact-row{
+      display:grid;
+      grid-template-columns:70px 1fr;
+      column-gap:6px;
+      align-items:start;
+    }
+
+    .contact-row span:first-child{font-weight:600;}
+
+    .icons{
+      display:flex;
+      gap:10px;
+      margin-bottom:18px;
+    }
+
+    .icon{
+      width:32px;
+      height:32px;
+      border-radius:50%;
+      border:1px solid var(--border);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background:#fff;
+    }
+
+    .icon img{width:16px;height:16px;display:block;}
+
+    .label{
+      font-size:12px;
+      letter-spacing:.12em;
+      color:#9ca3af;
+      margin-bottom:8px;
+      line-height:1.4;
+      font-weight:600;
+    }
+
+    .tag{
+      background:var(--bg-soft);
+      padding:6px 10px;
+      border-radius:10px;
+      font-size:13px;
+      margin-bottom:6px;
+    }
+
+    /* ===== Right ===== */
+    section{margin-bottom:48px;}
+
+    h2{
+      font-size:20px;
+      margin-bottom:14px;
+    }
+
+    .text{
+      font-size:14px;
+      line-height:1.75;
+      color:var(--text-muted);
+      max-width:720px;
+      text-align:justify;
+      text-align-last:left;
+    }
+
+    .placeholder {
+      max-width: 720px;
+      border: 1px dashed var(--border);
+      background: #fcfcff;
+      color: #9ca3af;
+      border-radius: var(--radius-md);
+      padding: 12px 14px;
+      font-size: 14px;
+      font-style: italic;
+      line-height: 1.6;
+    }
+
+    /* CV link without any border box */
+    .cv-link{
+      font-size:14px;
+      color:var(--text-muted);
+      max-width:720px;
+      line-height:1.75;
+    }
+    .cv-link a{
+      color:#2563eb;
+      text-decoration:none;
+      font-weight:500;
+    }
+    .cv-link a:hover{ text-decoration:underline; }
+
+    /* ===== Education ===== */
+    .edu-grid{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:16px;
+      max-width:980px;
+    }
+
+    .edu-card{
+      border:1px solid var(--border);
+      border-radius:var(--radius-md);
+      padding:14px;
+      background:#fff;
+    }
+
+    .edu-title{
+      font-size:14px;
+      font-weight:700;
+      margin-bottom:4px;
+      color:var(--text-main);
+    }
+
+    .edu-subtitle{
+      font-size:13px;
+      color:var(--text-muted);
+      margin-bottom:6px;
+      line-height:1.5;
+    }
+
+    .edu-dates{
+      font-size:13px;
+      color:var(--text-muted);
+      margin-bottom:10px;
+    }
+
+    .edu-core{
+      font-size:13px;
+      font-weight:700;
+      margin-bottom:10px;
+      color:var(--text-main);
+    }
+
+    .edu-category{
+      border:1px solid var(--border);
+      border-radius:999px;
+      padding:6px 10px;
+      font-size:13px;
+      font-weight:700;
+      background:var(--bg-soft);
+      margin:10px 0 8px;
+      color:var(--text-main);
+    }
+
+    .edu-list{
+      list-style:disc;
+      padding-left:18px;
+      font-size:13px;
+      color:var(--text-muted);
+      line-height:1.7;
+      margin-bottom:6px;
+    }
+
+    .edu-list li{margin:2px 0;}
+
+    /* ===== Skills (A version, updated) ===== */
+    .skills-block{
+      max-width:720px;
+      border:1px solid var(--border);
+      background:#fff;
+      border-radius:var(--radius-md);
+      padding:14px;
+    }
+
+    /* ✅ 修改点 1：加大左列列宽，让标题尽量单行显示 */
+    .skills-row{
+      display:grid;
+      grid-template-columns:300px 1fr; /* 原来 210px -> 300px */
+      gap:14px;
+      padding:10px 6px;
+      border-top:1px solid rgba(229,231,235,.7);
+    }
+
+    .skills-row:first-child{border-top:none;}
+
+    .skills-key{
+      font-size:13px;
+      font-weight:700;
+      color:var(--text-main);
+      white-space:nowrap; /* ✅ 保持单行 */
+    }
+
+    .skills-val{
+      font-size:13px;
+      color:var(--text-muted);
+      line-height:1.7;
+    }
+
+    @media (max-width:900px){
+      .layout{grid-template-columns:1fr;}
+      .edu-grid{grid-template-columns:1fr;}
+      :root{ --sticky-top:10px; }
+      .skills-row{ grid-template-columns:1fr; }
+      .skills-key{ margin-bottom:2px; white-space:normal; }
+    }
+  </style>
+</head>
+
+<body>
+<div class="page">
+
+  <header id="siteHeader">
+    <div class="site-title">Jiajun Tang</div>
+    <nav id="topNav" aria-label="Primary">
+      <span class="nav-indicator" id="navIndicator" aria-hidden="true"></span>
+      <a href="#about" class="active">About</a>
+      <a href="#education">Education</a>
+      <a href="#projects">Projects</a>
+      <a href="#skills">Skills</a>
+      <a href="#cv">CV</a>
+    </nav>
+  </header>
+
+  <div class="layout">
+
+    <!-- LEFT -->
+    <aside class="profile">
+      <div class="avatar">
+        <img src="avatar.jpg" alt="Jiajun Tang">
+      </div>
+
+      <div class="name">Jiajun Tang</div>
+
+      <div class="degree-main">
+        Operations Research (Master)<br>
+        Columbia University
+      </div>
+
+      <div class="degree-sub">
+        Finance (Bachelor)<br>
+        Shanghai University (SILC)
+      </div>
+
+      <div class="contact-info">
+        <div class="contact-row">
+          <span>Location:</span>
+          <div>
+            New York, USA<br>
+            Shanghai, China
+          </div>
+        </div>
+        <div class="contact-row">
+          <span>Phone:</span>
+          <div>
+            +1 (347) 506-7664<br>
+            +86 180-0183-5817
+          </div>
+        </div>
+      </div>
+
+      <div class="icons">
+        <a class="icon" href="mailto:jt3631@columbia.edu" title="Email">
+          <img src="icon-email.png" alt="Email">
+        </a>
+        <a class="icon" href="https://github.com/JiajunTang0721" target="_blank" rel="noopener noreferrer" title="GitHub">
+          <img src="icon-github.png" alt="GitHub">
+        </a>
+        <a class="icon" href="https://www.linkedin.com/in/jt0721" target="_blank" rel="noopener noreferrer" title="LinkedIn">
+          <img src="icon-linkedin.png" alt="LinkedIn">
+        </a>
+      </div>
+
+      <div class="label">Seeking For<br>Job Opportunities</div>
+      <div class="tag">Data Analyst</div>
+      <div class="tag">Business Analyst</div>
+      <div class="tag">Financial Risk Manager</div>
+      <div class="tag">Consulting</div>
+    </aside>
+
+    <!-- RIGHT -->
+    <main id="mainContent">
+
+      <section id="about">
+        <h2>About</h2>
+        <div class="text">
+          <p>
+            Operations Research graduate with strong foundations in optimization,
+            quantitative modeling, and data-driven decision-making. Experienced in applying
+            analytical and machine learning models to support risk assessment, forecasting,
+            and resource allocation under uncertainty.
+          </p>
+          <p style="margin-top:10px;">
+            Skilled in Python-based automation, ERP data processing, and demand forecasting,
+            using tools such as Gurobi, KNN, Random Forest, and XGBoost. Proven ability to
+            translate complex data into actionable insights across finance, technology, and
+            healthcare domains.
+          </p>
+        </div>
+      </section>
+
+      <section id="education">
+        <h2>Education</h2>
+
+        <div class="edu-grid">
+
+          <!-- Columbia -->
+          <div class="edu-card">
+            <div class="edu-title">Columbia University</div>
+            <div class="edu-subtitle">School of Engineering and Applied Science</div>
+            <div class="edu-dates">2025/09 – 2026/11</div>
+
+            <div class="edu-core">Core Courses:</div>
+
+            <div class="edu-category">Optimization & Simulation</div>
+            <ul class="edu-list">
+              <li>Optimization Models and Methods</li>
+              <li>Simulation</li>
+            </ul>
+
+            <div class="edu-category">Stats & Stochastic</div>
+            <ul class="edu-list">
+              <li>Stochastic Models</li>
+              <li>Introduction to Probability &amp; Statistics</li>
+            </ul>
+
+            <div class="edu-category">AI, ML & Analytics</div>
+            <ul class="edu-list">
+              <li>Business Analytics</li>
+              <li>Machine Learning for FE &amp; OR</li>
+              <li>Artificial Intelligence for OR &amp; FE</li>
+            </ul>
+
+            <div class="edu-category">Financial Engineering & Risk</div>
+            <ul class="edu-list">
+              <li>Introduction to Financial Engineering</li>
+              <li>Applied Financial Risk Management</li>
+            </ul>
+          </div>
+
+          <!-- Shanghai -->
+          <div class="edu-card">
+            <div class="edu-title">Shanghai University</div>
+            <div class="edu-subtitle">SILC Business School</div>
+            <div class="edu-dates">2021/09 – 2025/06</div>
+
+            <div class="edu-core">Core Courses:</div>
+
+            <div class="edu-category">Programming & Data</div>
+            <ul class="edu-list">
+              <li>Python Programming</li>
+              <li>Financial Big Data Analytics with Python</li>
+              <li>Financial Data Analysis &amp; Forecasting</li>
+            </ul>
+
+            <div class="edu-category">Finance Core</div>
+            <ul class="edu-list">
+              <li>Corporate Finance</li>
+              <li>Financial Management</li>
+              <li>Money and Banking</li>
+              <li>International Finance</li>
+              <li>Investment Analysis</li>
+            </ul>
+
+            <div class="edu-category">Risk & Quant</div>
+            <ul class="edu-list">
+              <li>Financial Risk Management</li>
+              <li>Derivative Securities</li>
+              <li>Fixed Income Securities</li>
+              <li>Applied Portfolio Management</li>
+              <li>Investment Banking</li>
+            </ul>
+
+            <div class="edu-category">FinTech</div>
+            <ul class="edu-list">
+              <li>Introduction to Financial Technology</li>
+              <li>Blockchain and Supply Chain Finance</li>
+            </ul>
+          </div>
+
+        </div>
+      </section>
+
+      <section id="projects">
+        <h2>Projects</h2>
+
+        <!-- Project 1: Bitcoin -->
+        <div class="edu-card" style="max-width:720px;">
+          <div class="edu-title">Integrated Bitcoin Risk Modeling</div>
+          <div class="edu-subtitle">Researcher · Quantitative Risk Analyst</div>
+
+          <div class="edu-category">Tools</div>
+          <ul class="edu-list">
+            <li>Python · NumPy · Pandas · SciPy · Matplotlib · LaTeX · GitHub</li>
+          </ul>
+
+          <div class="edu-category">Key Contributions & Conclusions</div>
+          <ul class="edu-list">
+            <li>Constructed daily log-return series and analyzed distributional properties</li>
+            <li>Modeled time-varying volatility using EWMA (λ = 0.94)</li>
+            <li>Identified volatility clustering and persistence via squared-return and variance autocorrelation</li>
+            <li>Estimated Value at Risk (VaR) using parametric (EWMA–Normal) and historical simulation methods</li>
+            <li>Computed Expected Shortfall (ES) with exact lognormal P&amp;L transformation</li>
+            <li>Compared parametric vs. empirical tail risk under heavy-tailed return behavior</li>
+            <li>Evaluated model adequacy through Kupiec unconditional coverage backtesting</li>
+            <li>Assessed regulatory implications of VaR model failures at extreme confidence levels</li>
+          </ul>
+
+          <div class="edu-category">Links</div>
+          <ul class="edu-list">
+            <li>
+              <a href="https://github.com/JiajunTang0721/integrated-bitcoin-risk-modeling"
+                 target="_blank"
+                 rel="noopener noreferrer"
+                 style="color:#2563eb;text-decoration:none;">
+                GitHub Repository
+              </a>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Project 2: TSP Art -->
+        <div class="edu-card" style="max-width:720px; margin-top:16px;">
+          <div class="edu-title">TSP Art Optimization from Portrait Images</div>
+          <div class="edu-subtitle">Algorithm Designer · Optimization Researcher</div>
+
+          <div class="edu-category">Tools</div>
+          <ul class="edu-list">
+            <li>Python · NumPy · OpenCV · Matplotlib · Gurobi · Graph Optimization</li>
+          </ul>
+
+          <div class="edu-category">Key Contributions & Conclusions</div>
+<ul class="edu-list">
+  <li>
+    Designed an edge- and region-aware importance sampling framework focusing on contours,
+    shading details, and facial features
+  </li>
+  <li>
+    Integrated low-level image structure (edges, local contrast) with semantic priors
+    (face and hair regions) to enhance portrait recognizability
+  </li>
+  <li>
+    Formulated a degree-2 minimum-length graph optimization via 2-factor relaxation,
+    enabling large-scale TSP-like construction without explicit subtour elimination
+  </li>
+  <li>
+    Developed a geometry-based cycle merging heuristic using nearest-neighbor
+    and orientation-aware strategies
+  </li>
+  <li>
+    Applied 2-opt local search to remove crossings and improve stroke continuity
+    and visual smoothness
+  </li>
+  <li>
+    Built a fully reproducible end-to-end pipeline converting raw images into
+    single-stroke line art for high-resolution rendering
+  </li>
+</ul>
+
+
+          <div class="edu-category">Links</div>
+          <ul class="edu-list">
+            <li>
+              <a href="https://github.com/JiajunTang0721/tsp-art-optimization"
+                 target="_blank"
+                 rel="noopener noreferrer"
+                 style="color:#2563eb;text-decoration:none;">
+                GitHub Repository
+              </a>
+            </li>
+          </ul>
+        </div>
+      </section>
+
+      <section id="skills">
+        <h2>Skills</h2>
+
+        <div class="skills-block">
+          <div class="skills-row">
+            <div class="skills-key">Programming</div>
+            <div class="skills-val">Python (Primary), SQL, R, MATLAB, Stata</div>
+          </div>
+
+          <div class="skills-row">
+            <div class="skills-key">Python Packages</div>
+            <div class="skills-val">NumPy, Pandas, Matplotlib, Gurobi, PyTorch, XGBoost</div>
+          </div>
+
+          <div class="skills-row">
+            <div class="skills-key">Machine Learning &amp; AI</div>
+            <div class="skills-val">
+              Regression, Classification, Boosting, Unsupervised Learning, Deep Learning,
+              Large Language Models, Reinforcement Learning, Agentic AI
+            </div>
+          </div>
+
+          <div class="skills-row">
+            <div class="skills-key">Optimization &amp; Operations Research</div>
+            <div class="skills-val">
+              Linear Programming, Integer Programming, Nonlinear Optimization, Stochastic Optimization,
+              Network Optimization
+            </div>
+          </div>
+
+          <div class="skills-row">
+            <div class="skills-key">Statistics &amp; Stochastic Modeling</div>
+            <div class="skills-val">
+              Probability Theory, Stochastic Processes, Simulation &amp; Output Analysis
+            </div>
+          </div>
+
+          <!-- ✅ 删除 Game Theory & Multi-Agent Systems -->
+
+          <div class="skills-row">
+            <div class="skills-key">Financial Risk &amp; Quantitative Finance</div>
+            <div class="skills-val">
+              Market Risk, Credit Risk, Liquidity Risk, Value-at-Risk, Stress Testing, Financial Regulation
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="cv">
+        <h2>CV</h2>
+        <p class="cv-link">
+          <a href="Jiajun Tang CV.pdf" target="_blank" rel="noopener noreferrer">Click here</a>
+          to view or download the full CV.
+        </p>
+      </section>
+
+    </main>
+  </div>
+</div>
+
+<script>
+  (function () {
+    const header = document.getElementById('siteHeader');
+    const nav = document.getElementById('topNav');
+    const indicator = document.getElementById('navIndicator');
+    const links = Array.from(nav.querySelectorAll('a'));
+    const sections = links
+      .map(a => document.querySelector(a.getAttribute('href')))
+      .filter(Boolean);
+
+    let isProgrammaticScroll = false;
+    let programmaticTimer = null;
+    let lastActiveId = null;
+    let ticking = false;
+
+    function getHeaderOffset() {
+      const styles = getComputedStyle(document.documentElement);
+      const gap = parseFloat(styles.getPropertyValue('--scroll-gap')) || 12;
+      return header.getBoundingClientRect().height + gap;
+    }
+
+    function setActiveById(id) {
+      if (id === lastActiveId) return;
+      lastActiveId = id;
+
+      const link = links.find(a => a.getAttribute('href') === '#' + id);
+      if (!link) return;
+
+      links.forEach(a => a.classList.toggle('active', a === link));
+      moveIndicatorTo(link);
+    }
+
+    function moveIndicatorTo(link) {
+      const navRect = nav.getBoundingClientRect();
+      const rect = link.getBoundingClientRect();
+      const pad = parseFloat(getComputedStyle(nav).paddingLeft) || 0;
+
+      const left = (rect.left - navRect.left) - pad;
+
+      indicator.style.width = rect.width + 'px';
+      indicator.style.transform = `translateX(${left}px)`;
+    }
+
+    function computeActiveSectionId() {
+      const offset = getHeaderOffset();
+      const y = window.scrollY + offset;
+
+      let active = sections[0];
+      for (let i = 0; i < sections.length; i++) {
+        const s = sections[i];
+        const top = s.getBoundingClientRect().top + window.scrollY;
+        if (top <= y + 1) active = s;
+      }
+
+      const nearBottom = (window.innerHeight + window.scrollY) >= (document.documentElement.scrollHeight - 2);
+      if (nearBottom) active = sections[sections.length - 1];
+
+      return active.id;
+    }
+
+    function scrollToSection(targetEl) {
+      const offset = getHeaderOffset();
+      const targetTop = targetEl.getBoundingClientRect().top + window.scrollY;
+
+      let y = targetTop - offset;
+
+      const maxY = document.documentElement.scrollHeight - window.innerHeight;
+      y = Math.max(0, Math.min(y, maxY));
+
+      isProgrammaticScroll = true;
+      clearTimeout(programmaticTimer);
+      window.scrollTo({ top: y, behavior: 'smooth' });
+
+      programmaticTimer = setTimeout(() => {
+        isProgrammaticScroll = false;
+        setActiveById(computeActiveSectionId());
+      }, 520);
+    }
+
+    function onScroll() {
+      if (ticking) return;
+      ticking = true;
+
+      requestAnimationFrame(() => {
+        ticking = false;
+        if (isProgrammaticScroll) return;
+
+        const id = computeActiveSectionId();
+        setActiveById(id);
+      });
+    }
+
+    links.forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const sel = link.getAttribute('href');
+        const target = document.querySelector(sel);
+        if (!target) return;
+
+        links.forEach(a => a.classList.toggle('active', a === link));
+        moveIndicatorTo(link);
+        scrollToSection(target);
+
+        history.pushState(null, '', sel);
+      });
+    });
+
+    function init() {
+      const hash = window.location.hash;
+      const startTarget = hash ? document.querySelector(hash) : null;
+
+      const initialId = startTarget ? startTarget.id : computeActiveSectionId();
+      setActiveById(initialId);
+
+      if (startTarget) {
+        setTimeout(() => scrollToSection(startTarget), 0);
+      } else {
+        const active = nav.querySelector('a.active') || links[0];
+        moveIndicatorTo(active);
+      }
+    }
+
+    window.addEventListener('resize', () => {
+      const active = nav.querySelector('a.active') || links[0];
+      moveIndicatorTo(active);
+      setActiveById(computeActiveSectionId());
+    });
+
+    window.addEventListener('scroll', onScroll, { passive: true });
+
+    window.addEventListener('popstate', () => {
+      const hash = window.location.hash || '#about';
+      const target = document.querySelector(hash);
+      if (target) {
+        setActiveById(target.id);
+        scrollToSection(target);
+      } else {
+        setActiveById(computeActiveSectionId());
+      }
+    });
+
+    window.addEventListener('load', init);
+  })();
+</script>
+
+</body>
+</html>
